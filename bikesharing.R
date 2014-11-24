@@ -115,9 +115,16 @@ test.output(model.boost.submit,validate,n.trees=5000)
 test.output(model.rf.submit,validate)
 #time series
 library(xts)
+<<<<<<< HEAD
 train.xts<-as.xts(x=train[,"count"],order.by=train[,"datetime"])
 plot(train.xts[(1:100),])
 f<-decompose(train.ts)  
 par(mfrow=c(2,1))
 acf(train.ts)
 pacf(train.ts)
+=======
+bikerentalxts<-as.xts(x=bikerental[,"count"],order.by=bikerental[,"datetime"])
+plot(bikerentalxts[(1:100),])
+
+
+>>>>>>> FETCH_HEAD
