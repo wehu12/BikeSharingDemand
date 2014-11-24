@@ -31,5 +31,5 @@ lm4<-lm(count~hour+holiday+season+weather+workingday+temp+atemp+humidity+windspe
 library(xts)
 bikerentalxts<-as.xts(x=bikerental[,"count"],order.by=bikerental[,"datetime"])
 plot(bikerentalxts[(1:100),])
-  
+
 
