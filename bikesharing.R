@@ -109,22 +109,19 @@ model.boost=gbm(myFormula,data=train,distribution= "gaussian",n.trees=5000, inte
 test.model(model.boost,test,n.trees=5000)
 
 #final model to submit
-model.rf.submit <- randomForest(myFormula, data=data, ntree=100, proximity=TRUE)
-model.boost.submit=gbm(myFormula,data=data,distribution= "gaussian",n.trees=5000, interaction.depth=6)
-test.output(model.boost.submit,validate,n.trees=5000)
-test.output(model.rf.submit,validate)
+#model.rf.submit <- randomForest(myFormula, data=data, ntree=100, proximity=TRUE)
+#model.boost.submit=gbm(myFormula,data=data,distribution= "gaussian",n.trees=5000, interaction.depth=6)
+#test.output(model.boost.submit,validate,n.trees=5000)
+#test.output(model.rf.submit,validate)
 #time series
 library(xts)
-<<<<<<< HEAD
-train.xts<-as.xts(x=train[,"count"],order.by=train[,"datetime"])
-plot(train.xts[(1:100),])
-f<-decompose(train.ts)  
-par(mfrow=c(2,1))
-acf(train.ts)
-pacf(train.ts)
-=======
-bikerentalxts<-as.xts(x=bikerental[,"count"],order.by=bikerental[,"datetime"])
-plot(bikerentalxts[(1:100),])
+#<<<<<<< HEAD
+#train.xts<-as.xts(x=train[,"count"],order.by=train[,"datetime"])
+#plot(train.xts[(1:100),])
+#f<-decompose(train.ts)  
+#par(mfrow=c(2,1))
+#acf(train.ts)
+#pacf(train.ts)
 
 
 >>>>>>> FETCH_HEAD
