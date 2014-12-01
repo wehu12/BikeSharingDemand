@@ -29,24 +29,23 @@ cross.validate<-function(){
     flag <- data$day==2*i-1|data$day==2*i
     train <-data[!flag,]
     test<-data[flag,]
-    model.1.1<-lm(count~datetime+holiday+season+weather+workingday+temp+atemp+humidity+windspeed, data=train)
+    #model.1.1<-lm(count~datetime+holiday+season+weather+workingday+temp+atemp+humidity+windspeed, data=train)
     model.1.2<-lm(count ~ hour + weekday + year + month + day+holiday + season+weather +temp + humidity + windspeed+workingday*hour,data=train)
-    lm1d<-lm(abs(resid(model.1.2))~temp + humidity + windspeed, data=train)
+    lm1d<-lm(abs(resid(model.1.2))~hour + weekday + year + month + day+holiday + season+weather +temp + humidity + windspeed+workingday*hour, data=train)
     weight1d <- 1/ ( fitted(lm1d) )^2
     model.1.3<-lm(count ~ hour + weekday + year + month + day+holiday + season+weather +temp + humidity + windspeed+workingday*hour,data=train,weight=weight1d)
-    model.1.4 <- lm(count~ hour + weekday + year + month + day + season + weather + temp + humidity + windspeed + workingday + hour*workingday + hour*weekday + hour*month + weather*temp + temp*humidity + weather*humidity,data=train)
+    #model.1.4 <- lm(count~ hour + weekday + year + month + day + season + weather + temp + humidity + windspeed + workingday + hour*workingday + hour*weekday + hour*month + weather*temp + temp*humidity + weather*humidity,data=train)
     
     #poisson regression
-    myFormula=count ~ hour + weekday + year + month + holiday + weather +temp + humidity + windspeed + workingday * hour
-    model.2.1<-glm(myFormula, family=quasipoisson(link="identity"), data=train,start=rep(0.025,62))
-    summary(model.2.1)
+    #myFormula=count ~ hour + weekday + year + month + holiday + weather +temp + humidity + windspeed + workingday * hour
+    #model.2.1<-glm(myFormula, family=quasipoisson(link="identity"), data=train,start=rep(0.025,62))
     
     #decision tree
-    myFormula <- count ~ hour+weekday+year+month+holiday+season+weather+temp+humidity+windspeed
-    model.3.1 <- rpart(myFormula, data = train,control = rpart.control(minsplit = 10))
+    #myFormula <- count ~ hour+weekday+year+month+holiday+season+weather+temp+humidity+windspeed
+    #model.3.1 <- rpart(myFormula, data = train,control = rpart.control(minsplit = 10))
     
     #random forest
-    model.3.2 <- randomForest(myFormula, data=train, ntree=100, proximity=TRUE)
+    #model.3.2 <- randomForest(myFormula, data=train, ntree=100, proximity=TRUE)
     te1.1=cbind(te1.1,test.model(model.1.1,test))
     te1.2=cbind(te1.2,test.model(model.1.2,test))
     te1.3=cbind(te1.3,test.model(model.1.3,test))
@@ -147,7 +146,7 @@ library(randomForest)
 model.1.1<-lm(count~datetime+holiday+season+weather+workingday+temp+atemp+humidity+windspeed, data=train)
 model.1.2<-lm(count ~ hour + weekday + year + month + day+holiday + season+weather +temp + humidity + windspeed+workingday*hour,data=train)
 
-lm1d<-lm(abs(resid(model.1.2))~temp + humidity + windspeed, data=train)
+lm1d<-lm(abs(resid(model.1.2))~hour + weekday + year + month + day+holiday + season+weather +temp + humidity + windspeed+workingday*hour, data=train)
 weight1d <- 1/ ( fitted(lm1d) )^2
 model.1.3<-lm(count ~ hour + weekday + year + month + day+holiday + season+weather +temp + humidity + windspeed+workingday*hour,data=train,weight=weight1d)
 
@@ -175,6 +174,19 @@ te2.1<-test.model(model.2.1,test)
 te3.1<-test.model(model.3.1,test)
 te3.2<-test.model(model.3.2,test)
 cbind(te1.1,te1.2,te1.3,te1.4,te2.1,te3.1,te3.2)
+
+#compare actual and prediction
+i<-which(colnames(test)=="count")
+act<-test[,i]
+pred1.1 <- predict(model.1.1, newdata=test[,-i])
+pred1.2 <- predict(model.1.2, newdata=test[,-i])
+pred1.3 <- predict(model.1.3, newdata=test[,-i])
+pred1.4 <- predict(model.1.4, newdata=test[,-i])
+pred2.1 <- predict(model.2.1, newdata=test[,-i])
+pred3.1 <- predict(model.3.1, newdata=test[,-i])
+pred3.2 <- predict(model.3.2, newdata=test[,-i])
+prediction= data.frame(cbind(act,pred1.1,pred1.2,pred1.3,pred1.4,pred2.1,pred3.1,pred3.2))
+
 
 errors = cross.validate()
 
