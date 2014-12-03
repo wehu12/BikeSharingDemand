@@ -112,7 +112,7 @@ create.plots<-function(){
 }
 
 #set working directory
-setwd('/Users/linahu/Documents/Developer/Bike\ Sharing/')
+setwd('/Users/Tianlong/Google Drive/IsyE 6414B Project')
 
 data<-read.csv("train.csv")
 validate <-read.csv("test.csv")
@@ -134,6 +134,7 @@ avg_count<- aggregate(count~weather*temp, data = train, FUN=mean)
 qplot(temp,count,data=avg_count, color = weather,geom=c("point","smooth"),se=FALSE,size = 1)
 
 #linear models with different time parameters and interaction terms
+<<<<<<< Updated upstream
 #lm1<-lm(count~holiday+season+weather+workingday+temp+atemp+humidity+windspeed, data=train )
 #lm2<-lm(count~datetime+holiday+season+weather+workingday+temp+atemp+humidity+windspeed, data=train)
 #lm3<-lm(count~hour+holiday+season+weather+workingday+temp+atemp+humidity+windspeed, data=train)
@@ -158,6 +159,21 @@ model.1.4 <- step(lm.all, trace=FALSE);
 myFormula=count ~ hour + weekday + year + month + holiday + weather +temp + humidity + windspeed + workingday * hour
 model.2.1<-glm(myFormula, family=quasipoisson(link="identity"), data=train,start=rep(0.025,62))
 summary(model.2.1)
+=======
+lm1<-lm(count~holiday+season+weather+workingday+temp+atemp+humidity+windspeed, data=train )
+lm2<-lm(count~datetime+holiday+season+weather+workingday+temp+atemp+humidity+windspeed, data=train)
+lm3<-lm(count~hour+holiday+season+weather+workingday+temp+atemp+humidity+windspeed, data=train)
+lm4<-lm(count~hour+holiday+season+weather+workingday+temp+atemp+humidity+windspeed+holiday*season+workingday*season+weather*holiday, data=train)
+lm5<-lm(count~hour+holiday+season+weather+workingday+atemp+humidity+windspeed+sqrt(windspeed*humidity), data=train)
+lm6<-lm(count~hour+holiday+season+weather+workingday+windspeed*humidity*atemp, data=train)
+lm7<-lm(count~hour+holiday+season+windspeed*humidity*atemp, data=train)
+lm8<-lm(count ~ hour + weekday + year + month + holiday + season + weather + temp + humidity + windspeed+weekday*hour,data=train)
+c(test.model(lm1,test),test.model(lm2,test),test.model(lm3,test),test.model(lm4,test),test.model(lm5,test),test.model(lm6,test),test.model(lm7,test))
+test.model(lm8,test)
+# to do:
+# partition data based on categorical fields
+# add best selection models
+>>>>>>> Stashed changes
 
 #decision tree
 myFormula <- count ~ hour+weekday+year+month+holiday+season+weather+temp+humidity+windspeed
@@ -211,6 +227,56 @@ errors = cross.validate()
 #acf(train.ts)
 #pacf(train.ts)
 
+### Model B: the best subset model with k=3 predictors 
+fat1.leaps <- regsubsets(count~temp+atemp+humidity+windspeed+temp*humidity+windspeed*temp+windspeed*humidity, data= train, nbest= 100, really.big= TRUE); 
+fat1.models <- summary(fat1.leaps)$which;
+fat1.models.size <- as.numeric(attr(fat1.models, "dimnames")[[1]]);
+fat1.models.rss <- summary(fat1.leaps)$rss;
+op <- which(fat1.models.size == 3); 
+flag <- op[which.min(fat1.models.rss[op])]; 
+modelBform <- fat1.models[flag,];
+Bform <- names(modelBform)[modelBform][-1];
+Bform <- paste(Bform, collapse = " + ");
+Bform <- paste("count~", Bform);
+modelB <- lm(as.formula(Bform), data= train);
+summary(modelB)
+
+##weighted
+modelA <- lm( count~temp+atemp+humidity+windspeed+temp*humidity+windspeed*temp+windspeed*humidity, data=train);
 
 
+lm1d1 <- lm( abs(resid(modelA))~ temp+atemp+humidity+windspeed+temp*humidity+windspeed*temp+windspeed*humidity, data=train);
+weight1d <- 1/ ( fitted(lm1d1) )^2
+lm1d<-lm(count ~ temp+atemp+humidity+windspeed+temp*humidity+windspeed*temp+windspeed*humidity, data=train, weight = weight1d)
+
+lm1e1 <- lm(abs(resid(lm1d)) ~ temp+atemp+humidity+windspeed+temp*humidity+windspeed*temp+windspeed*humidity, data=train);
+weight1e<-1/ ( fitted(lm1e1) )^2
+lm1e <- lm(count ~ temp+atemp+humidity+windspeed+temp*humidity+windspeed*temp+windspeed*humidity, data=train, weight = weight1e);
+
+lm1f1 <- lm(abs(resid(lm1e)) ~ temp+atemp+humidity+windspeed+temp*humidity+windspeed*temp+windspeed*humidity, data=train);
+weight1f<-1/ ( fitted(lm1f1) )^2
+lm1f <- lm(count ~temp+atemp+humidity+windspeed+temp*humidity+windspeed*temp+windspeed*humidity, data=train, weight = weight1f);
+
+lm1g1 <- lm(abs(resid(lm1f))~ temp+atemp+humidity+windspeed+temp*humidity+windspeed*temp+windspeed*humidity, data=train);
+weight1g<-1/ ( fitted(lm1g1) )^2
+lm1g <- lm(count ~ temp+atemp+humidity+windspeed+temp*humidity+windspeed*temp+windspeed*humidity, data=train, weight = weight1g);
+
+lm1h1 <- lm(abs(resid(lm1g)) ~ temp+atemp+humidity+windspeed+temp*humidity+windspeed*temp+windspeed*humidity, data=train);
+weight1h<-1/ ( fitted(lm1h1) )^2
+lm1h <- lm(count ~temp+atemp+humidity+windspeed+temp*humidity+windspeed*temp+windspeed*humidity, data=train, weight = weight1h);
+
+lm1i1 <- lm(abs(resid(lm1h))~ temp+atemp+humidity+windspeed+temp*humidity+windspeed*temp+windspeed*humidity, data=train);
+weight1i<-1/ ( fitted(lm1i1) )^2
+lm1i <- lm(count ~temp+atemp+humidity+windspeed+temp*humidity+windspeed*temp+windspeed*humidity, data=train, weight = weight1i);
+
+c(test.model(modelA,test),test.model(lm1d,test),test.model(lm1e,test),test.model(lm1f,test),test.model(lm1g,test),test.model(lm1h,test),test.model(lm1i,test))
 >>>>>>> FETCH_HEAD
+weight1i<-1/ ( fitted(lm4) )^2
+lm1k <- lm(count~hour+holiday+season+weather+workingday+temp+atemp+humidity+windspeed+holiday*season+workingday*season+weather*holiday, weight = weight1i,data=train);
+summary(modelA)
+summary(lm1d)
+summary(lm1e)
+summary(lm1f)
+summary(lm1g)
+summary(lm1h)
+summary(lm1i)
